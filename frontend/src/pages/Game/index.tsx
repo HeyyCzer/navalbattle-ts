@@ -1,10 +1,19 @@
 import { useState } from "react";
+import { io } from "socket.io-client";
 import GameBoard from "../../components/Game/Board";
 
 export default function Game() {
 	const playerName = "Jogador 1";
 
 	const [isPlayerTurn, setIsPlayerTurn] = useState(true);
+
+	const socket = io(`http://localhost:8000`, {
+		reconnectionDelayMax: 10000,
+	});
+
+	socket.on("connect", () => {
+		console.log("Connected to server");
+	});
 
 	return (
 		<div className="flex flex-col">
