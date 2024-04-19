@@ -21,8 +21,8 @@ interface BoardState {
 		hits: number[]
 	},
 
-	placeShip: (cell: number, shipSize: number, orientation: "H" | "V") => void,
-	removeShip: (targetCell: number) => void,
+	// placeShip: (cell: number, shipSize: number, orientation: "H" | "V") => void,
+	// removeShip: (targetCell: number) => void,
 }
 
 const useBoardStore = create<BoardState>()(
@@ -35,65 +35,62 @@ const useBoardStore = create<BoardState>()(
 			ships: [],
 			hits: [],
 			inventory: {
-				ships: [
-					{ size: 4, amount: 1 },
-					{ size: 3, amount: 1 },
-					{ size: 2, amount: 3 },
-					{ size: 1, amount: 4 },
-				],
+				ships: [],
 			}
 		},
 		opponent: {
 			hits: [],
 		},
 
-		placeShip: (cell, shipSize, orientation) => set((state) => {
-			if (state.player.ships.some((s) => s.cells.includes(cell))) return state;
+		// TODO: Take this responsibility to the backend
+		// placeShip: (cell, shipSize, orientation) => set((state) => {
+		// 	if (state.player.ships.some((s) => s.cells.includes(cell))) return state;
 
-			const newShip: Ship = {
-				origin: cell,
-				size: shipSize,
-				orientation,
-				cells: Array.from({ length: shipSize }, (_, i) => {
-					return orientation === "H" ? cell + i : cell + i * 10;
-				}),
-			}
+		// 	const newShip: Ship = {
+		// 		origin: cell,
+		// 		size: shipSize,
+		// 		orientation,
+		// 		cells: Array.from({ length: shipSize }, (_, i) => {
+		// 			return orientation === "H" ? cell + i : cell + i * 10;
+		// 		}),
+		// 	}
 
-			if (shipSize) {
-				const foundShip = state.player.inventory.ships.find((s) => s.size === shipSize);
-				if (foundShip) {
-					foundShip.amount -= 1;
-				}
-			}
+		// 	// if (shipSize) {
+		// 	// 	const foundShip = state.player.inventory.ships.find((s) => s.size === shipSize);
+		// 	// 	if (foundShip) {
+		// 	// 		foundShip.amount -= 1;
+		// 	// 	}
+		// 	// }
 
-			return {
-				...state,
-				player: {
-					...state.player,
-					ships: [...state.player.ships, newShip],
-					inventory: state.player.inventory,
-				},
-			};
-		}),
-		removeShip: (targetCell) => set((state: BoardState) => {
-			const ship = state.player.ships.find((s) => s.cells.includes(targetCell));
-			const shipSize = ship?.size;
-			if (shipSize) {
-				const foundShip = state.player.inventory.ships.find((s) => s.size === shipSize);
-				if (foundShip) {
-					foundShip.amount += 1;
-				}
-			}
+		// 	return {
+		// 		...state,
+		// 		player: {
+		// 			...state.player,
+		// 			ships: [...state.player.ships, newShip],
+		// 			// inventory: state.player.inventory,
+		// 		},
+		// 	};
+		// }),
+		// removeShip: (targetCell) => set((state: BoardState) => {
+		// 	// TODO: Move to backend
+		// 	// const ship = state.player.ships.find((s) => s.cells.includes(targetCell));
+		// 	// const shipSize = ship?.size;
+		// 	// if (shipSize) {
+		// 	// 	const foundShip = state.player.inventory.ships.find((s) => s.size === shipSize);
+		// 	// 	if (foundShip) {
+		// 	// 		foundShip.amount += 1;
+		// 	// 	}
+		// 	// }
 
-			return {
-				...state,
-				player: {
-					...state.player,
-					ships: state.player.ships.filter((s) => !s.cells.includes(targetCell)),
-					inventory: state.player.inventory,
-				},
-			}
-		}),
+		// 	return {
+		// 		...state,
+		// 		player: {
+		// 			...state.player,
+		// 			ships: state.player.ships.filter((s) => !s.cells.includes(targetCell)),
+		// 			// inventory: state.player.inventory,
+		// 		},
+		// 	}
+		// }),
 	}), {
 		name: 'board-storage',
 	}),

@@ -13,8 +13,6 @@ export default function GameBoard(props: GameBoardProps) {
 	const { isShipPlacement } = useGameStore(state => state);
 	const {
 		boardOptions,
-		placeShip,
-		removeShip
 	} = useBoardStore(state => state);
 	const gameState = useBoardStore(state => state[props.tableOwner]);
 
@@ -100,7 +98,6 @@ export default function GameBoard(props: GameBoardProps) {
 		const handleUpdateOrientation = (e: KeyboardEvent) => {
 			if (e.key === "r") {
 				setShipOrientation((prev) => prev === "H" ? "V" : "H");
-				console.log("Orientation:", shipOrientation);
 			}
 		}
 		window.addEventListener("keydown", handleUpdateOrientation);

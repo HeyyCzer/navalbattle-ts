@@ -1,28 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import GameBoard from "../../components/Game/Board";
+import Logo from "../../components/Logo";
 
 export default function Game() {
 	const playerName = "Jogador 1";
 
 	const [isPlayerTurn, setIsPlayerTurn] = useState(true);
 
-	const socket = io(`http://localhost:8000`, {
-		reconnectionDelayMax: 10000,
-	});
+	useEffect(() => {
+		const socket = io(`http://localhost:8000`, {
+			reconnectionDelayMax: 10000,
+		});
 
-	socket.on("connect", () => {
-		console.log("Connected to server");
-	});
+		socket.on("connect", () => {
+			console.log("Connected to server");
+		});
+	}, []);
 
 	return (
 		<div className="flex flex-col">
 			{/* Header */}
 			<div className="text-center py-6">
-				<h1 className="font-semibold tracking-wider uppercase text-2xl">
-					<span className="text-emerald-400">Navy</span>
-					War
-				</h1>
+				<Logo />
 				<h3>
 					Partida de{" "}
 					<span id="lobbyOwner" className="text-emerald-500 font-semibold">{ playerName }</span>

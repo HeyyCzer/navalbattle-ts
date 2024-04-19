@@ -1,7 +1,9 @@
+import { lazy } from "react";
 import { Route, Switch, Router as WouterRouter } from "wouter";
-import Game from "./pages/Game";
-import Home from "./pages/Home";
-import NotFound from "./pages/NotFound";
+
+const Home = lazy(() => import("./pages/Home"));
+const Game = lazy(() => import("./pages/Game"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 export default function Router() {
 	return (

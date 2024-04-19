@@ -2,19 +2,23 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "type": "module",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node .",
-    "dev": "nodemon ."
+    "start": "pnpm build-and-run",
+    "build-and-run": "tsc && node dist/index.js || exit 1",
+    "dev": "nodemon -e ts --exec \"pnpm build-and-run\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "@types/node": "^20.12.7",
+    "nodemon": "^3.1.0",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2",
+    "colorts": "^0.1.63",
     "socket.io": "^4.7.5"
   }
 }
