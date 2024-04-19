@@ -12,72 +12,37 @@ export function paintCells(
 }
 
 export function drawHologram(
-	placing: boolean,
-	currentCell: number | null,
-	currentShipSize: number,
-	shipOrientation: "H" | "V",
-	boardOptions: { totalCells: number, cols: number },
-	refs: RefObject<HTMLDivElement>[]
+	currentCell: number,
+	size: number,
+	orientation: "H" | "V",
+	boardOptions: { cols: number },
+	refs: RefObject<HTMLDivElement>[],
+	color: string = "rgba(255, 255, 255, 0.1)"
 ) {
-	if (currentCell === null) return;
+	const cells = Array.from({ length: size }).map((_, i) => {
+		return orientation === "H" ? currentCell + i : currentCell + i * boardOptions.cols;
+	});
+	
+	const hologramRefs = refs.filter((_, i) => cells.includes(i));
 
-	const color = placing ? "rgba(255, 255, 255, 0.2)" : "";
-	const errorColor = "rgba(255, 0, 0, 0.2)";
-
-	if (shipOrientation === "H") {
-		for (let i = 0; i < currentShipSize; i++) {
-			// Render error
-			if (placing && currentCell % boardOptions.cols + currentShipSize > boardOptions.cols) {
-				for (let i = 0; i < currentShipSize; i++) {
-					// Draw error only in the same row
-					if (Math.floor((currentCell + i) / boardOptions.cols) !== Math.floor(currentCell / boardOptions.cols)) return;
-
-					const cell = refs[currentCell + i]?.current;
-					if (!cell) return;
-
-					(cell as HTMLDivElement).style.backgroundColor = errorColor;
-				}
-
-				// Render hologram
-			} else {
-				const cell = refs[currentCell + i]?.current;
-				if (!cell) return;
-
-				(cell as HTMLDivElement).style.backgroundColor = color;
-			}
-		}
-	} else {
-		for (let i = 0; i < currentShipSize; i++) {
-			// Render error
-			if (placing && currentCell + i * boardOptions.cols >= boardOptions.totalCells) {
-				for (let i = 0; i < currentShipSize; i++) {
-					const cell = refs[currentCell + i * boardOptions.cols]?.current;
-					if (!cell) return;
-
-					(cell as HTMLDivElement).style.backgroundColor = errorColor;
-				}
-
-				// Render hologram
-			} else {
-				const cell = refs[currentCell + i * boardOptions.cols]?.current;
-				if (!cell) return;
-
-				(cell as HTMLDivElement).style.backgroundColor = color;
-			}
-
-		}
+	// If the ship starts in a line and goes to another, or don't fit in the board
+	const breaksLine = cells.some((cell, i) => {
+		if (i === 0) return false;
+		return orientation === "H" ? cell % boardOptions.cols === 0 : false;
+	});
+	const isOutOfBoard = hologramRefs.length < size;
+	if (breaksLine || isOutOfBoard) {
+		return paintCells(hologramRefs, "rgba(255, 0, 0, 0.2)");
 	}
+
+	paintCells(hologramRefs, color);
 }
 
-export function drawShip(ship: Ship, color: string, refs: RefObject<HTMLDivElement>[]) {
-	const { origin, size, orientation } = ship;
-
-	const cells = Array.from({ length: size }).map((_, i) => {
-		return orientation === "H" ? origin + i : origin + i * 10;
-	});
+export function drawShip(ship: Ship, refs: RefObject<HTMLDivElement>[]) {
+	const { cells } = ship;
 
 	const shipsRefs = refs.filter((_, i) => cells.includes(i));
-	paintCells(shipsRefs, color);
+	paintCells(shipsRefs, "rgba(16, 185, 129, 0.2)");
 }
 
 export function drawHit(refs: RefObject<HTMLDivElement>[]) {
