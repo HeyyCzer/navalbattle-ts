@@ -3,15 +3,14 @@ import { GameEvent } from "../../event";
 
 export default {
 	name: "removeShip",
-	execute(server, socket, gameId, ship) {
+	execute(server, socket, { gameId, cell }) {
 		const game = getGame(gameId);
 		if (!game) return;
 
-		const player = game.getPlayer(socket.id);
-
+		const player = game.getPlayerBySocketId(socket.id);
 		if (player) {
-			player.removeShip(ship);
-			server.to(gameId).emit("shipRemoved", player.id, ship);
+			player.removeShip(cell);
+			player.updateBoard(game);
 		}
 	}
 } as GameEvent;

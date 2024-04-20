@@ -19,6 +19,7 @@
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.2",
     "colorts": "^0.1.63",
+    "dotenv": "^16.4.5",
     "socket.io": "^4.7.5"
   }
 }

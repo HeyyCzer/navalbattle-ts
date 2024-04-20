@@ -1,32 +1,54 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
+import { useParams } from "wouter";
+import useSocketStore from "../../Socket/store";
 import { Ship } from "../game";
 import useGameStore from "../store";
 import { drawHologram, drawShip } from "./boardUtils";
-import useBoardStore from "./store";
 
-interface GameBoardProps {
-	tableOwner: "player" | "opponent";
-}
+export default function GameBoard() {
+	const socket = useSocketStore(state => state.socket);
 
-export default function GameBoard(props: GameBoardProps) {
-	const { isShipPlacement } = useGameStore(state => state);
-	const {
-		boardOptions,
-	} = useBoardStore(state => state);
-	const gameState = useBoardStore(state => state[props.tableOwner]);
+	const { game } = useParams();
+	const { isShipPlacement, isAttacking, isBeingAttacked } = useGameStore(state => state);
 
-	const ships = props.tableOwner === "player" ? (gameState as { ships: Ship[]; hits: number[]; }).ships : [];
-	const inventory = props.tableOwner === "player" ? (gameState as { inventory: { ships: { size: number; amount: number; }[]; }; }).inventory : null;
-	const hits = gameState.hits;
+	const [boardOwner, setBoardOwner] = useState("you");
+	const [boardOptions, setBoardOptions] = useState({
+		rows: 10,
+		columns: 10
+	});
 
-	const totalCells = boardOptions.rows * boardOptions.cols;
+	const [ships, setShips] = useState<Ship[]>([]);
+	const [shots, setShots] = useState<number[]>([]);
+	const [inventory, setInventory] = useState({
+		ships: [] as {
+			amount: 0,
+			size: 0
+		}[]
+	});
 
+	const totalCells = useMemo(() => boardOptions.columns * boardOptions.rows, [boardOptions.columns, boardOptions.rows]);
 	const refs = Array.from({ length: totalCells }).map(() => useRef(null));
 
 	const [currentCell, setCurrentCell] = useState<number | null>(null);
-	const [currentShipSize, setCurrentShipSize] = useState<number | null>(inventory?.ships.find((s) => s.amount > 0)?.size ?? null);
+	const [currentShipSize, setCurrentShipSize] = useState<number | null>(inventory.ships.find((s) => s.amount > 0)?.size ?? null);
 	const [shipOrientation, setShipOrientation] = useState<"H" | "V">("H");
+
+	useEffect(() => {
+		if (!socket) return;
+
+		socket.on("updateBoard", (player) => {
+			console.log("updateBoard", player);
+			setBoardOwner(player.boardOwner)
+			setShips(player.ships);
+			setShots(player.shots);
+			setInventory(player.inventory);
+		});
+
+		return () => {
+			socket.off("updateBoard");
+		}
+	}, [socket]);
 
 	useEffect(() => {
 		// Render ships
@@ -34,13 +56,13 @@ export default function GameBoard(props: GameBoardProps) {
 			drawShip(ship, refs);
 		}
 
-		// Render hits
-		for (const hit of hits) {
-			const cell = refs[hit].current;
+		// Render shots
+		for (const shot of shots) {
+			const cell = refs[shot].current;
 			if (!cell) return;
 
 			// Check if some ship is in the cell
-			const ship = ships.find((ship) => ship.cells.includes(hit));
+			const ship = ships.find((ship) => ship.cells.includes(shot));
 			if (ship) {
 				(cell as HTMLDivElement).style.backgroundColor = "red";
 			} else {
@@ -70,7 +92,7 @@ export default function GameBoard(props: GameBoardProps) {
 			if (currentCell !== null && currentShipSize !== null) {
 				// Check if ship conflicts with another
 				const cells = Array.from({ length: currentShipSize }).map((_, i) => {
-					return shipOrientation === "H" ? currentCell + i : currentCell + i * boardOptions.cols;
+					return shipOrientation === "H" ? currentCell + i : currentCell + i * boardOptions.columns;
 				});
 
 				const isConflict = ships.some((ship) => {
@@ -83,11 +105,11 @@ export default function GameBoard(props: GameBoardProps) {
 				drawHologram(currentCell, currentShipSize, shipOrientation, boardOptions, refs);
 			}
 		}
-	}, [isShipPlacement, currentCell, shipOrientation]);
+	}, [isShipPlacement, currentCell, shipOrientation, ships, shots]);
 
 	// Toggle ship orientation
 	useEffect(() => {
-		if (!isShipPlacement || props.tableOwner !== "player") return;
+		if (!isShipPlacement || boardOwner !== "you") return;
 		
 		if (inventory && inventory.ships.find((s) => s.size === currentShipSize)?.amount === 0) {
 			const foundShip = inventory.ships.find((s) => s.amount > 0);
@@ -102,16 +124,19 @@ export default function GameBoard(props: GameBoardProps) {
 		}
 		window.addEventListener("keydown", handleUpdateOrientation);
 
-		if (currentCell === null || currentShipSize === null) return;
-
 		// Place ship
 		const handlePlaceShip = (e: MouseEvent) => {
 			e.preventDefault();
-			if (currentCell === null) return;
+			if (currentCell === null || !currentShipSize || !shipOrientation || !socket) return;
 
 			// Left click to place ship
 			if (e.button === 0) {
-				placeShip(currentCell, currentShipSize, shipOrientation);
+				socket.emit("placeShip", {
+					gameId: game,
+					origin: currentCell,
+					size: currentShipSize,
+					orientation: shipOrientation
+				});
 			}
 		}
 		window.addEventListener("mousedown", handlePlaceShip);
@@ -119,10 +144,10 @@ export default function GameBoard(props: GameBoardProps) {
 		// Remove ship
 		const handleRemoveShip = (e: MouseEvent) => {
 			e.preventDefault();
-			if (currentCell === null) return;
+			if (currentCell === null || !socket) return;
 
 			// Right click to remove ship
-			removeShip(currentCell);
+			socket.emit("removeShip", { gameId: game, cell: currentCell });
 		};
 		window.addEventListener("contextmenu", handleRemoveShip);
 
@@ -131,13 +156,25 @@ export default function GameBoard(props: GameBoardProps) {
 			window.removeEventListener("contextmenu", handleRemoveShip);
 			window.removeEventListener("mousedown", handlePlaceShip);
 		}
-	}, [useBoardStore, inventory, currentCell, currentShipSize, shipOrientation]);
+	}, [boardOwner, socket, isShipPlacement, inventory, currentCell, currentShipSize, shipOrientation]);
 
 	return (
 		<div>
+			{/* Debug */}
+			{
+				<div className="*:block">
+					<span>MyId: { String(sessionStorage.getItem("playerId")) }</span>
+					<span>TableOwner: { String(boardOwner) }</span>
+					<span>CurrentCell: { String(currentCell) }</span>
+					<span>IsShipPlacement?: { String(isShipPlacement) }</span>
+					<span>ShipOrientation: { String(shipOrientation) }</span>
+					<span>ShipSize: { String(currentShipSize) }</span>
+				</div>
+			}
+
 			<div
 				className="bg-gray-700/30 grid w-fit h-fit border border-gray-700"
-				style={{ gridTemplateColumns: `repeat(${boardOptions.cols}, 1fr)` }}
+				style={{ gridTemplateColumns: `repeat(${boardOptions.columns}, 1fr)` }}
 				onMouseLeave={() => setCurrentCell(null)}
 			>
 				{

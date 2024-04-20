@@ -1,13 +1,24 @@
+import { server } from "..";
+import Ship from "./entities/ship";
+import Shot from "./entities/shot";
+import Game from "./game";
+import Inventory from "./inventory";
+
 class Player {
 
 	id: string;
+	socketId: string | null;
 
 	ships: Ship[];
 	shots: Shot[];
 	inventory: Inventory;
 
-	constructor(id: string) {
+	readyToStart: boolean = false;
+
+	constructor(id: string, socketId: string | null) {
 		this.id = id;
+		this.socketId = socketId;
+
 		this.ships = [];
 		this.shots = [];
 		this.inventory = new Inventory([
@@ -16,6 +27,13 @@ class Player {
 			{ size: 2, amount: 3 },
 			{ size: 1, amount: 4 },
 		]);
+	}
+
+	setSocketId(socketId: string | null) {
+		this.socketId = socketId;
+	}
+	setReadyToStart(readyToStart: boolean) {
+		this.readyToStart = readyToStart;
 	}
 
 	getShip(cell: number) {
@@ -31,4 +49,17 @@ class Player {
 	removeShip(cell: number) {
 		this.ships = this.ships.filter(ship => !ship.cells.includes(cell));
 	}
+
+	updateBoard(game: Game | null) {
+		if (this.socketId) {
+			server.to(this.socketId).emit("updateBoard", {
+				boardOwner: game?.isPlacingShips || game?.currentPlayer?.id !== this.id ? "you" : "opponent",
+				ships: this.ships,
+				shots: this.shots,
+				inventory: this.inventory,
+			});
+		}
+	}
 }
+
+export default Player;

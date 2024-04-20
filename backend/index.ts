@@ -1,7 +1,11 @@
+import { config } from "dotenv";
+config();
+
 import 'colorts/lib/string';
 
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { GameEvent } from './event';
 import { getFiles } from "./utils/files";
 import logger from './utils/logger';
 
@@ -32,9 +36,6 @@ async function loadEvents() {
 }
 
 io.on("connection", (socket: any) => {
-	events.filter((event) => event.name === "playerConnected")
-		.forEach((event) => event.execute(socket));
-
 	for (const event of events) {
 		socket.on(event.name, (...args: any) => {
 			logger.debug(`User: ${socket.id} | Event: ${event.name} | Json: ${JSON.stringify(args)}`.gray);
@@ -50,3 +51,5 @@ loadEvents().then(() => {
 		logger.success("Listening on *:8000");
 	});
 })
+
+export { io as server };

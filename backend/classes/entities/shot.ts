@@ -7,3 +7,5 @@ class Shot {
 	}
 
 }
+
+export default Shot;

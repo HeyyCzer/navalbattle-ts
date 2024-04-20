@@ -15,12 +15,12 @@ export function drawHologram(
 	currentCell: number,
 	size: number,
 	orientation: "H" | "V",
-	boardOptions: { cols: number },
+	boardOptions: { columns: number },
 	refs: RefObject<HTMLDivElement>[],
 	color: string = "rgba(255, 255, 255, 0.1)"
 ) {
 	const cells = Array.from({ length: size }).map((_, i) => {
-		return orientation === "H" ? currentCell + i : currentCell + i * boardOptions.cols;
+		return orientation === "H" ? currentCell + i : currentCell + i * boardOptions.columns;
 	});
 	
 	const hologramRefs = refs.filter((_, i) => cells.includes(i));
@@ -28,7 +28,7 @@ export function drawHologram(
 	// If the ship starts in a line and goes to another, or don't fit in the board
 	const breaksLine = cells.some((cell, i) => {
 		if (i === 0) return false;
-		return orientation === "H" ? cell % boardOptions.cols === 0 : false;
+		return orientation === "H" ? cell % boardOptions.columns === 0 : false;
 	});
 	const isOutOfBoard = hologramRefs.length < size;
 	if (breaksLine || isOutOfBoard) {

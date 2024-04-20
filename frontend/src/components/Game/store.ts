@@ -1,22 +1,25 @@
-import { Socket } from 'socket.io-client';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-
-interface GameState {
-	socket: Socket | null
-	isPlayerTurn: boolean
-	isShipPlacement: boolean
-}
+import { GameState } from './game';
 
 const useGameStore = create<GameState>()(
 	devtools((set) => ({
-		socket: null,
+		isWaitingForPlayers: true,
+		
+		isPlacingShips: false,
+		isPlaying: false,
+		isAttacking: false,
+		isBeingAttacked: false,
+
+		isFinished: false,
+
 		isPlayerTurn: true,
 		isShipPlacement: true,
 
-		setSocket: (socket: Socket) => set({ socket }),
 		setIsPlayerTurn: (isPlayerTurn: boolean) => set({ isPlayerTurn }),
-		setIsShipPlacement: (isShipPlacement: boolean) => set({ isShipPlacement })
+		setIsShipPlacement: (isShipPlacement: boolean) => set({ isShipPlacement }),
+
+		updateGame: (state: GameState) => set(state)
 	}), {
 		name: 'game-storage',
 	}),
