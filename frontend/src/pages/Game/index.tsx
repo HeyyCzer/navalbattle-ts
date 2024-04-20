@@ -4,7 +4,7 @@ import GameBoard from "../../components/Game/Board";
 import WaitingPlayers from "../../components/Game/WaitingPlayers";
 import { GameState } from "../../components/Game/game";
 import useGameStore from "../../components/Game/store";
-import Logo from "../../components/Logo";
+import Navbar from "../../components/Navbar";
 import useSocketStore from "../../components/Socket/store";
 
 export default function Game() {
@@ -46,13 +46,7 @@ export default function Game() {
 	return (
 		<div className="flex flex-col">
 			{/* Header */}
-			<div className="text-center py-6">
-				<Logo />
-				<h3>
-					Partida de{" "}
-					<span id="lobbyOwner" className="text-emerald-500 font-semibold">{ playerName }</span>
-				</h3>
-			</div>
+			<Navbar />
 
 			<main className="mx-auto pb-8">
 				<div className="flex gap-x-8">

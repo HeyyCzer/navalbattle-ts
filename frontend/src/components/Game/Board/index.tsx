@@ -161,7 +161,7 @@ export default function GameBoard() {
 	return (
 		<div>
 			{/* Debug */}
-			{
+			{/* {
 				<div className="*:block">
 					<span>MyId: { String(sessionStorage.getItem("playerId")) }</span>
 					<span>TableOwner: { String(boardOwner) }</span>
@@ -170,7 +170,7 @@ export default function GameBoard() {
 					<span>ShipOrientation: { String(shipOrientation) }</span>
 					<span>ShipSize: { String(currentShipSize) }</span>
 				</div>
-			}
+			} */}
 
 			<div
 				className="bg-gray-700/30 grid w-fit h-fit border border-gray-700"

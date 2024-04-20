@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { Route, Switch, Router as WouterRouter } from "wouter";
 import { navigate } from "wouter/use-browser-location";
-import Logo from "./components/Logo";
+import Connecting from "./components/Connecting";
 import useSocketStore from "./components/Socket/store";
 import Game from "./pages/Game";
 import Home from "./pages/Home";
@@ -48,14 +48,7 @@ export default function Router() {
 
 	if (!connected) {
 		return (
-			<div className="h-screen w-screen">
-				<div className="flex h-full w-full items-center justify-center">
-					<div className="text-center">
-						<Logo />
-						<p className="text-2xl text-center">Conectando ao servidor...</p>
-					</div>
-				</div>
-			</div>
+			<Connecting />
 		);
 	}
 

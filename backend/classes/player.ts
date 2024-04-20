@@ -15,7 +15,7 @@ class Player {
 
 	readyToStart: boolean = false;
 
-	constructor(id: string, socketId: string | null) {
+	constructor(id: string, socketId: string) {
 		this.id = id;
 		this.socketId = socketId;
 

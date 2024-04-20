@@ -1,9 +1,6 @@
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { Link } from "wouter";
-import Logo from "../../components/Logo";
+import Navbar from "../../components/Navbar";
 import useSocketStore from "../../components/Socket/store";
 
 const boardSizes = [
@@ -15,7 +12,7 @@ const boardSizes = [
 	},
 	{
 		size: "10x10",
-		description: "Padrão", 
+		description: "Padrão e Equilibrado", 
 		columns: 10, 
 		rows: 10
 	},
@@ -41,25 +38,9 @@ export default function Home() {
 
 	return (
 		<div>
-			<nav className="py-6 px-12 grid grid-cols-3">
-				<div>
-					<Logo />
-				</div>
+			<Navbar />
 
-				<div className="flex justify-center gap-x-4 text-gray-400">
-					<Link href="#about">
-						Aprenda a jogar
-					</Link>
-				</div>
-
-				<div className="flex justify-end">
-					<Link href="https://github.com/heyyczer/navalbattle-ts" target="_blank" rel="noopener noreferrer">
-						<FontAwesomeIcon icon={faGithub} />
-					</Link>
-				</div>
-			</nav>
-
-			<div className="py-12">
+			<div className="px-4 py-12">
 				<div className="px-8 py-6 rounded-md mx-auto w-fit border border-white/20 bg-white/5">
 					<div className="text-center">
 						<h1 className="text-lg font-medium trakcing-widest">Criar uma partida</h1>
@@ -76,10 +57,10 @@ export default function Home() {
 										<div
 											key={index}
 											onClick={() => setBoardSize(size)}
-											className={twMerge("flex flex-col border border-emerald-500/20 bg-emerald-500/10 py-3 px-4 rounded-lg", size === boardSize && "bg-emerald-500/40 border-emerald-500/60")}
+											className={twMerge("flex flex-col justify-between border border-emerald-500/20 bg-emerald-500/10 py-3 px-2 rounded-lg transition-colors", size === boardSize && "bg-emerald-500/40 border-emerald-500/60")}
 										>
-											<h1 className="my-auto text-4xl text-center">{size}</h1>
-											<span className="text-center text-xs text-white/80 mt-2">{description}</span>
+											<h1 className="text-2xl 2xl:text-4xl text-center">{size}</h1>
+											<span className="text-center text-xs text-white/80">{description}</span>
 										</div>
 									))
 								}
@@ -88,7 +69,7 @@ export default function Home() {
 
 						<button
 							onClick={() => handleCreateGame(boardSize)}	
-							className="mx-auto bg-emerald-500 rounded-lg px-4 py-2"
+							className="mx-auto bg-emerald-500 hover:bg-emerald-600 transition-colors rounded-lg px-4 py-2"
 						>
 							Criar partida
 						</button>
