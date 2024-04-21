@@ -180,39 +180,25 @@ export default function GameBoard() {
 	}, [socket, isReady])
 
 	return (
-		<div>
-			{/* Debug */}
-			{/* {
-				<div className="text-xs">
-					<div>MyId: { String(sessionStorage.getItem("playerId")) }</div>
-					<div>TableOwner: { String(boardOwner) }</div>
-					<br />
-					<div>CurrentCell: { String(currentCell) }</div>
-					<div>ShipOrientation: { String(shipOrientation) }</div>
-					<div>ShipSize: {String(currentShipSize)}</div>
-					<br />
-					<div>IsPlacingShips?: { String(isPlacingShips) }</div>
-					<div>IsReady?: {String(isReady)}</div>
-					<div>IsPlaying?: {String(isPlaying)}</div>
-					<div>IsMyTurn?: {String(isMyTurn)}</div>
-				</div>
-			} */}
-
+		<div className="px-2 w-full lg:w-1/3 mx-auto">
 			<div
 				className={twMerge(
-					"bg-gray-700/30 grid w-fit h-fit border border-gray-700",
+					"bg-gray-700/30 grid w-full h-fit border border-gray-700",
 					((isPlaying && isMyTurn) && "outline outline-1 outline-emerald-500/40"),
 					((isPlaying && !isMyTurn) && "outline outline-1 outline-red-500/40")
 				)}
 				style={{ gridTemplateColumns: `repeat(${boardOptions.columns}, 1fr)` }}
 				onMouseLeave={() => setCurrentCell(null)}
+				onMouseUp={() => setCurrentCell(null)}
+				onTouchEnd={() => setCurrentCell(null)}
 			>
 				{
 					Array.from({ length: totalCells }).map((_, i) => (
 						<div
 							ref={refs[i]}
 							onMouseEnter={() => setCurrentCell(i)}
-							key={i} className="border border-gray-700 min-w-16 aspect-square text-white/20 text-xs flex items-center justify-center"
+							onTouchEnd={() => setCurrentCell(null)}
+							key={i} className="border border-gray-700 w-auto aspect-square text-white/20 text-xs flex items-center justify-center"
 						>
 							{ i + 1 }
 						</div>
@@ -226,7 +212,7 @@ export default function GameBoard() {
 						<span className="text-xs uppercase tracking-widest">Navios no inventário:</span>
 					</div>
 
-					<div className="flex justify-between flex-wrap">
+					<div className="flex justify-between flex-wrap gap-2">
 						{
 							inventory && inventory.ships.sort((a, b) => a.size > b.size ? 1 : -1).map((ship, i) => (
 								<button

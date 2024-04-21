@@ -17,7 +17,7 @@ import NotFound from "./pages/NotFound";
 export default function Router() {
 	const [connected, setConnected] = useState(false);
 
-	const { socket, setSocket } = useSocketStore((state: any) => state);
+	const { setSocket } = useSocketStore((state: any) => state);
 
 	useEffect(() => {
 		localStorage.debug = '*';

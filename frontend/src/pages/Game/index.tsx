@@ -50,8 +50,8 @@ export default function Game() {
 			{/* Header */}
 			<Navbar />
 
-			<main className="mx-auto pb-8">
-				<div className="flex gap-x-8">
+			<main className="mx-auto pb-8 w-full">
+				<div className="flex flex-col gap-x-8">
 					{
 						isWaitingForPlayers && (
 							<WaitingPlayers />
@@ -60,7 +60,7 @@ export default function Game() {
 
 					{
 						(isPlacingShips || isPlaying || isFinished) && (
-							<div>
+							<div className="w-full">
 								<div className="text-center my-4 h-12">
 									{/* Your */}
 									<div>

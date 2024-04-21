@@ -56,6 +56,17 @@ export default {
 				type: "success",
 				message: "Você acertou, atire novamente!"
 			});
+
+			if (targetPlayer.socketId) {
+				server.to(targetPlayer.socketId).emit("showToast", {
+					type: "warn",
+					message: "Você foi atingido, aguarde a sua vez de atirar!"
+				});
+			}
+		} else {
+			server.to(game.id).emit("showToast", {
+				message: "Nenhum navio foi atingido..."
+			});
 		}
 	},
 } as GameEvent;

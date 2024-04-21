@@ -75,7 +75,6 @@ class Game {
 		const defender = this.players.find(player => player.id !== attacker?.id);
 
 		if (!attacker || !defender) return;
-		if (!attacker.socketId || !defender.socketId) return;
 
 		// Only ship cells that are hit
 		const filtredShips = defender.ships.map(ship => {
@@ -84,22 +83,26 @@ class Game {
 		});
 
 		// Update attacker
-		server.to(attacker.socketId).emit("updateBoard", {
-			ships: filtredShips,
-			shots: attacker.shots,
-			inventory: {
-				ships: []
-			}
-		});
+		if (attacker.socketId) {
+			server.to(attacker.socketId).emit("updateBoard", {
+				ships: filtredShips,
+				shots: attacker.shots,
+				inventory: {
+					ships: []
+				}
+			});
+		}
 
 		// Update defender
-		server.to(defender.socketId).emit("updateBoard", {
-			ships: defender.ships,
-			shots: attacker.shots,
-			inventory: {
-				ships: []
-			}
-		});
+		if (defender.socketId) {
+			server.to(defender.socketId).emit("updateBoard", {
+				ships: defender.ships,
+				shots: attacker.shots,
+				inventory: {
+					ships: []
+				}
+			});
+		}
 	}
 
 	// Modify game-state
