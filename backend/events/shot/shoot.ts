@@ -27,7 +27,7 @@ export default {
 			return;
 		}
 
-		if (player.shots.includes(cell)) {
+		if (player.shots.some(shot => shot.cell === cell)) {
 			socket.emit("showToast", {
 				type: "error",
 				message: "Você já atirou nessa posição!"
