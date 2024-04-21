@@ -15,6 +15,16 @@ export default {
 			client.emit("savePlayerId", playerId);
 		}
 
+		if (game.players.filter(player => player.id !== playerId).length >= 2) {
+			client.emit("showToast", {
+				type: "error",
+				message: "Essa sala já está cheia! Tente outra.",
+				time: 8000
+			});
+			client.emit("redirect", "/");
+			return;
+		}
+
 		client.join(gameId);
 
 		game.addPlayer(new Player(playerId, client.id));
