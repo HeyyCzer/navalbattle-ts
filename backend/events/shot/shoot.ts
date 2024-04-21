@@ -9,21 +9,53 @@ export default {
 		if (!game.isPlaying) return; // Game not started
 
 		const player = game.getPlayerBySocketId(socket.id);
-		if (!player || player.alreadyShot) return; // Player not found or already shot
-		if (game.currentPlayer?.id !== player.id) return; // Not your turn
-		if (player.shots.includes(cell)) return; // Already shot in this cell
+		if (!player) return;
 
-		player.alreadyShot = true;
+		if (player.alreadyShot) {
+			socket.emit("showToast", {
+				type: "error",
+				message: "Você já atirou nessa rodada!"
+			});
+			return;
+		}
+
+		if (game.currentPlayer?.id !== player.id) {
+			socket.emit("showToast", {
+				type: "error",
+				message: "Aguarde a sua vez de atirar!"
+			});
+			return;
+		}
+
+		if (player.shots.includes(cell)) {
+			socket.emit("showToast", {
+				type: "error",
+				message: "Você já atirou nessa posição!"
+			});
+			return;
+		}
+
+		const targetPlayer = game.players.find(p => p.id !== player.id);
+		if (!targetPlayer) return;
+
+		const isHit = targetPlayer.ships.some(ship => ship.cells.includes(cell));
+
+		player.alreadyShot = !isHit;
 		player.addShot(cell);
 
 		game.updateRender();
 
 		game.checkConditions("game_over");
 
-		if (!game.isFinished) {
+		if (!game.isFinished && !isHit) {
 			setTimeout(() => {
 				game.nextPlayer();
 			}, 5000);
+		} else if (isHit) {
+			socket.emit("showToast", {
+				type: "success",
+				message: "Você acertou, atire novamente!"
+			});
 		}
 	},
 } as GameEvent;

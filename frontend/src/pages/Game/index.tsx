@@ -43,7 +43,7 @@ export default function Game() {
 			socket.off("savePlayerId");
 			socket.off("gameUpdated");
 		}
-	}, [socket])
+	}, [socket, isWaitingForPlayers])
 
 	return (
 		<div className="flex flex-col">

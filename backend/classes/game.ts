@@ -119,8 +119,24 @@ class Game {
 			const defender = this.players.find(player => player.id !== this.currentPlayer?.id);
 			if (!defender) return;
 
-			const isGameOver = defender.ships.every(ship => ship.cells.every(cell => defender.shots.some(shot => shot.cell === cell)));
+			const isGameOver = defender.ships.every(ship => ship.cells.every(cell => this.currentPlayer?.shots.some(shot => shot.cell === cell)));
 			if (isGameOver) {
+				if (defender.socketId) {
+					server.to(defender.socketId).emit("showToast", {
+						message: "😿 Você perdeu! Mas está tudo bem, não foi por falta de esforço!",
+						time: 20000,
+					});
+				}
+
+				if (this.currentPlayer?.socketId) {
+					server.to(this.currentPlayer.socketId).emit("showToast", {
+						message: "🥇 Você venceu o jogo. Foi uma bela partida!",
+						time: 20000,
+					});
+				}
+
+				server.to(this.id).emit("redirect", "/");
+
 				this.endGame();
 			}
 		}

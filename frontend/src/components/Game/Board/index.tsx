@@ -168,7 +168,7 @@ export default function GameBoard() {
 		return () => {
 			window.removeEventListener("mousedown", handleShoot);
 		}
-	}, [socket, isPlaying, isMyTurn, currentCell]);
+	}, [socket, isPlaying, isMyTurn, iAlreadyShot, currentCell]);
 
 	const handleReady = useCallback(() => {
 		if (!socket) return;

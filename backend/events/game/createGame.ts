@@ -5,6 +5,6 @@ export default {
 	name: "createGame",
 	async execute(server, client, { columns, rows }) {
 		const game = createGame(null, columns, rows);
-		client.emit("gameCreated", game);
+		client.emit("redirect", `/game/${game.id}`);
 	}
 } as GameEvent;

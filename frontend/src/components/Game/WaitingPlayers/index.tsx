@@ -1,5 +1,6 @@
 import { faCopy } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { toast } from "react-toastify";
 
 export default function WaitingPlayers() {
 	return (
@@ -14,6 +15,9 @@ export default function WaitingPlayers() {
 						className="mr-2 bg-gray-700/50 rounded-md py-1 px-2"
 						onClick={() => {
 							navigator.clipboard.writeText(window.location.href);
+							toast.success("Link copiado!", {
+								autoClose: 2000
+							});
 						}}
 					>
 						<FontAwesomeIcon icon={faCopy} />

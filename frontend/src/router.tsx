@@ -1,5 +1,6 @@
 // import { lazy } from "react";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { io } from "socket.io-client";
 import { Route, Switch, Router as WouterRouter } from "wouter";
 import { navigate } from "wouter/use-browser-location";
@@ -35,8 +36,36 @@ export default function Router() {
 			setConnected(false);
 		});
 
-		socket.on("gameCreated", (game: any) => {
-			navigate(`/game/${game.id}`);
+		socket.on("redirect", (path: string) => {
+			navigate(path);
+		});
+
+		socket.on("showToast", (t: {
+			type?: string;
+			message: string;
+			time?: number;
+		}) => {
+			const options = {
+				autoClose: t.time
+			}
+
+			switch (t.type) {
+				case "error":
+					toast.error(t.message, options);
+					break;
+				case "success":
+					toast.success(t.message, options);
+					break;
+				case "info":
+					toast.info(t.message, options);
+					break;
+				case "warn":
+					toast.warn(t.message, options);
+					break;
+				default:
+					toast(t.message, options);
+					break;
+			}
 		});
 
 		setSocket(socket);
