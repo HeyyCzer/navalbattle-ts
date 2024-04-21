@@ -34,6 +34,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - uses: bahmutov/npm-install@v1.4.5
+        with:
+          working-directory: ./frontend
       - name: Install dependencies
         run: npm i
       - name: Build
