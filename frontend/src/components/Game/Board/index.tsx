@@ -189,7 +189,6 @@ export default function GameBoard() {
 				)}
 				style={{ gridTemplateColumns: `repeat(${boardOptions.columns}, 1fr)` }}
 				onMouseLeave={() => setCurrentCell(null)}
-				onMouseUp={() => setCurrentCell(null)}
 				onTouchEnd={() => setCurrentCell(null)}
 			>
 				{
