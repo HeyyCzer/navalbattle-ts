@@ -1,13 +1,13 @@
 import Player from "../../classes/player";
-import { createGame, getGame } from "../../controller/game.controller";
+import { createGame, getGame, updateGame } from "../../controller/game.controller";
 import { GameEvent } from "../../event";
 
 export default {
 	name: "playerJoined",
-	execute(server, client, playerId, gameId) {
+	execute(server, client, { gameId, playerId }) {
 		let game = getGame(gameId);
 		if (!game) {
-			game = createGame(gameId, 8, 8);
+			game = createGame(gameId, 10, 10);
 		}
 
 		if (!playerId) {
@@ -24,14 +24,11 @@ export default {
 			player.setSocketId(client.id);
 		}
 
-		game.checkConditionsToStart("place_ships");
+		game.checkConditions("place_ships");
 
-		const gameCopy = { ...game } as any;
-		delete gameCopy.currentPlayer;
-		delete gameCopy.players;
-		client.emit("gameUpdated", game);
+		updateGame(game, player);	
 
-		if (player && !game.isWaitingForPlayers) {
+		if (player) {
 			player.updateBoard(game);
 		}
 	}

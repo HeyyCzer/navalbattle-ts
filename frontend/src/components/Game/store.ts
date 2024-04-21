@@ -4,20 +4,17 @@ import { GameState } from './game';
 
 const useGameStore = create<GameState>()(
 	devtools((set) => ({
+		isMyTurn: false,
+		iAlreadyShot: false,
+
 		isWaitingForPlayers: true,
-		
 		isPlacingShips: false,
+		isReady: false,
 		isPlaying: false,
-		isAttacking: false,
-		isBeingAttacked: false,
 
 		isFinished: false,
 
-		isPlayerTurn: true,
-		isShipPlacement: true,
-
-		setIsPlayerTurn: (isPlayerTurn: boolean) => set({ isPlayerTurn }),
-		setIsShipPlacement: (isShipPlacement: boolean) => set({ isShipPlacement }),
+		timeToStart: null,
 
 		updateGame: (state: GameState) => set(state)
 	}), {

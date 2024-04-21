@@ -1,6 +1,7 @@
 import { server } from "..";
 import Board from "../classes/board";
 import Game from "../classes/game";
+import Player from "../classes/player";
 import { createId } from "../utils/cuid";
 
 const GAMES = new Map<string, Game>();
@@ -47,13 +48,28 @@ export function saveGame(game: Game, updateForPlayers: boolean) {
 	GAMES.set(game.id, game);
 
 	if (updateForPlayers) {
-		const gameCopy = { ...game } as any;
-		delete gameCopy.currentPlayer;
-		delete gameCopy.players;
-		server.to(game.id).emit("gameUpdated", gameCopy);
+		updateGame(game, null);	
+	}
+}
+
+export function updateGame(game: Game, target: Player | null = null) {
+	let targets = game.players;
+	if (target) {
+		targets = [target];
 	}
 
-	for (const player of game.players) {
-		player.updateBoard(game);
+	const gameCopy = { ...game } as any;
+	delete gameCopy.currentPlayer;
+	delete gameCopy.players;
+	delete gameCopy.timer;
+
+	for (const player of targets) {
+		if (!player.socketId) continue;
+
+		gameCopy.isReady = player.readyToStart;
+		gameCopy.isMyTurn = game.isPlaying && game.currentPlayer?.id === player.id;
+		gameCopy.iAlreadyShot = player.alreadyShot;
+
+		server.to(player.socketId).emit("gameUpdated", gameCopy);
 	}
 }

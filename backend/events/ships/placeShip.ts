@@ -18,16 +18,21 @@ export default {
 						return;
 					}
 				}
-
-				if (cell >= game.board.columns * game.board.rows) continue;
 			}
+
+			const breaksLine = cells.some((cell, i) => {
+				if (i === 0) return false;
+				return orientation === "H" ? cell % game.board.columns === 0 : false;
+			});
+			const isOutOfBoard = game.board.columns * game.board.rows < size;
+			if (breaksLine || isOutOfBoard) return;
 
 			// Check if the player has the ship in their inventory
 			const inventoryShip = player.inventory.ships.find(ship => ship.size === size);
 			if (!inventoryShip || inventoryShip.amount <= 0) return;
 			
 			inventoryShip.amount--;
-			
+
 			// Place the ship
 			player.placeShip(origin, size, orientation);
 			player.updateBoard(game);

@@ -8,9 +8,19 @@ export default {
 		if (!game) return;
 
 		const player = game.getPlayerBySocketId(socket.id);
-		if (player) {
-			player.removeShip(cell);
-			player.updateBoard(game);
-		}
+		if (!player) return;
+
+		const ship = player.getShip(cell);
+		if (!ship) return;
+
+		player.removeShip(cell);
+
+		// Check if the player has the ship in their inventory
+		const inventoryShip = player.inventory.ships.find(s => s.size === ship.size);
+		if (!inventoryShip) return;
+		
+		inventoryShip.amount++;
+
+		player.updateBoard(game);
 	}
 } as GameEvent;

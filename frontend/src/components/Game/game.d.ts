@@ -1,33 +1,16 @@
 interface GameState {
+	isMyTurn: boolean
+	iAlreadyShot: boolean
+
 	isWaitingForPlayers: boolean
 	isPlacingShips: boolean
+	isReady: boolean
 	isPlaying: boolean
-	isAttacking: boolean
-	isBeingAttacked: boolean
 	isFinished: boolean
 
-	isPlayerTurn: boolean
-	isShipPlacement: boolean
-}
+	timeToStart: number | null
 
-interface BoardState {
-	readonly boardOptions: {
-		rows: number,
-		cols: number,
-	},
-	player: {
-		ships: Ship[],
-		shots: number[],
-		inventory: {
-			ships: {
-				size: number,
-				amount: number,
-			}[]
-		}
-	},
-	opponent: {
-		shots: number[]
-	},
+	updateGame: (state: GameState) => void
 }
 
 interface Ship {

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export default function WaitingPlayers() {
 	return (
-		<div className="bg-white/5 border border-white/20 rounded-md px-8 py-6">
+		<div className="mt-8 bg-white/5 border border-white/20 rounded-md px-8 py-6">
 			<h1 className="text-emerald-500 text-lg tracking-widest font-medium">Aguardando jogadores...</h1>
 			<div className="text-gray-400">
 				<p>Convide seus amigos para jogar!</p>

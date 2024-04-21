@@ -1,3 +1,4 @@
+import { server } from "..";
 import { saveGame } from "../controller/game.controller";
 import Board from "./board";
 import Player from "./player";
@@ -14,6 +15,9 @@ class Game {
 	isPlacingShips: boolean;
 	isPlaying: boolean;
 	isFinished: boolean;
+
+	timeToStart: number | null = null;
+	timer: NodeJS.Timeout | null = null;
 
 	constructor(id: string, board: Board) {
 		this.id = id;
@@ -55,28 +59,94 @@ class Game {
 		if (this.currentPlayer === null) {
 			this.currentPlayer = this.players[0];
 		} else {
+			this.currentPlayer.alreadyShot = false;
+
 			const index = this.players.indexOf(this.currentPlayer);
 			this.currentPlayer = this.players[(index + 1) % this.players.length];
 		}
-		this.updateGame(false);
+
+		this.updateRender();
+		this.updateGame(true);
+	}
+	updateRender() {
+		const attacker = this.currentPlayer;
+		const defender = this.players.find(player => player.id !== attacker?.id);
+
+		if (!attacker || !defender) return;
+		if (!attacker.socketId || !defender.socketId) return;
+
+		// Only ship cells that are hit
+		const filtredShips = defender.ships.map(ship => {
+			const cells = ship.cells.filter(cell => attacker.shots.some(shot => shot.cell === cell));
+			return { ...ship, cells };
+		});
+
+		// Update attacker
+		server.to(attacker.socketId).emit("updateBoard", {
+			ships: filtredShips,
+			shots: attacker.shots,
+			inventory: {
+				ships: []
+			}
+		});
+
+		// Update defender
+		server.to(defender.socketId).emit("updateBoard", {
+			ships: defender.ships,
+			shots: attacker.shots,
+			inventory: {
+				ships: []
+			}
+		});
 	}
 
 	// Modify game-state
-	checkConditionsToStart(action: "place_ships" | "play") {
+	checkConditions(action: "place_ships" | "play" | "game_over") {
 		if (action === "place_ships") {
 			if (this.isPlacingShips || this.isPlaying || this.isFinished) return;
 			if (this.players.length === 2) {
-				this.startGame();
+				this.startPlacingShips();
 			}
 		} else if (action === "play") {
 			if (!this.isPlacingShips || this.isPlaying || this.isFinished) return;
 			if (this.players.every(player => player.readyToStart)) {
-				this.startPlaying();
+				this.startTimer();
+			}
+		} else if (action === "game_over") {
+			if (!this.isPlaying || this.isFinished) return;
+			
+			// Check if every defender ship cell is hit by shots
+			const defender = this.players.find(player => player.id !== this.currentPlayer?.id);
+			if (!defender) return;
+
+			const isGameOver = defender.ships.every(ship => ship.cells.every(cell => defender.shots.some(shot => shot.cell === cell)));
+			if (isGameOver) {
+				this.endGame();
 			}
 		}
 	}
 
-	startGame() {
+	startTimer() {
+		this.timeToStart = 5;
+		this.timer = setInterval(() => {
+			if (this.timeToStart === null || !this.isPlacingShips || this.isPlaying || this.isFinished || !this.players.every(player => player.readyToStart)) {
+				this.timeToStart = null;
+				this.updateGame(true);
+				clearInterval(this.timer as NodeJS.Timeout);
+				return;
+			}
+			
+			if (this.timeToStart === 0) {
+				clearInterval(this.timer as NodeJS.Timeout);
+				this.startPlaying();
+			} else {
+				this.timeToStart--;
+				this.updateGame(true);
+			}
+		}, 1000);
+	}
+
+	startPlacingShips() {
 		this.isWaitingForPlayers = false;
 		this.isPlacingShips = true;
 		this.updateGame(true);
@@ -84,6 +154,7 @@ class Game {
 	startPlaying() {
 		this.isPlacingShips = false;
 		this.isPlaying = true;
+		this.nextPlayer();
 		this.updateGame(true);
 	}
 	endGame() {

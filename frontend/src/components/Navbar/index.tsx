@@ -6,9 +6,9 @@ import Logo from "../Logo";
 export default function Navbar() {
 	return (
 		<nav className="py-6 px-12 grid grid-cols-3 gap-y-2 border-b border-white/5">
-			<div className="order-1">
+			<Link href="/" className="order-1">
 				<Logo />
-			</div>
+			</Link>
 
 			<div className="flex justify-center gap-x-4 text-gray-400 sm:order-2 order-3 col-span-full sm:col-span-1">
 				<Link href="#about">

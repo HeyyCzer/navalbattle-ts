@@ -3,14 +3,17 @@ import { GameEvent } from "../../event";
 
 export default {
 	name: "playerReady",
-	execute(server, client, gameId) {
+	execute(server, client, { gameId, isReady }) {
 		const game = getGame(gameId);
-		if (game) {
-			const player = game.getPlayerBySocketId(client.id);
-			if (player) {
-				player.setReadyToStart(true);
-				game.checkConditionsToStart("play");
-			}
-		}
+		if (!game) return;
+
+		const player = game.getPlayerBySocketId(client.id);
+		if (!player) return;
+		if (player.inventory.ships.some((s) => s.amount > 0)) return;
+
+		player.setReadyToStart(isReady);
+		game.checkConditions("play");
+
+		game.updateGame(true);
 	}
 } as GameEvent;

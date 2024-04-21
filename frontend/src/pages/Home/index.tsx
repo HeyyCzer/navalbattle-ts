@@ -4,28 +4,29 @@ import Navbar from "../../components/Navbar";
 import useSocketStore from "../../components/Socket/store";
 
 const boardSizes = [
-	{
-		size: "8x8",
-		description: "Pequeno e Rápido",
-		columns: 8,
-		rows: 8
-	},
+	// {
+	// 	size: "8x8",
+	// 	description: "Pequeno e Rápido",
+	// 	columns: 8,
+	// 	rows: 8
+	// },
 	{
 		size: "10x10",
 		description: "Padrão e Equilibrado", 
 		columns: 10, 
-		rows: 10
+		rows: 10,
+		default: true
 	},
-	{
-		size: "12x12",
-		description: "Grande e Desafiador", 
-		columns: 12, 
-		rows: 12
-	},
+	// {
+	// 	size: "12x12",
+	// 	description: "Grande e Desafiador", 
+	// 	columns: 12, 
+	// 	rows: 12
+	// },
 ];
 
 export default function Home() {
-	const [boardSize, setBoardSize] = useState("8x8");
+	const [boardSize, setBoardSize] = useState(boardSizes.find(board => board.default)?.size || boardSizes[0].size);
 
 	const socket = useSocketStore(state => state.socket);
 	
@@ -33,7 +34,10 @@ export default function Home() {
 		const board = boardSizes.find(board => board.size === size);
 		if (!board || !socket) return;
 
-		socket.emit("createGame", board.columns, board.rows)
+		socket.emit("createGame", {
+			columns: board.columns,
+			rows: board.rows
+		})
 	};
 
 	return (

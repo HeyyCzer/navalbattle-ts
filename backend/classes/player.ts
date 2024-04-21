@@ -13,6 +13,7 @@ class Player {
 	shots: Shot[];
 	inventory: Inventory;
 
+	alreadyShot: boolean = false;
 	readyToStart: boolean = false;
 
 	constructor(id: string, socketId: string) {
@@ -50,12 +51,21 @@ class Player {
 		this.ships = this.ships.filter(ship => !ship.cells.includes(cell));
 	}
 
+	getShot(cell: number) {
+		return this.shots.find(shot => shot.cell === cell);
+	}
+	addShot(cell: number) {
+		this.shots.push(new Shot(cell));
+	}
+
 	updateBoard(game: Game | null) {
 		if (this.socketId) {
+			const isMyTurn = game?.currentPlayer?.id === this.id;
+
 			server.to(this.socketId).emit("updateBoard", {
-				boardOwner: game?.isPlacingShips || game?.currentPlayer?.id !== this.id ? "you" : "opponent",
-				ships: this.ships,
-				shots: this.shots,
+				boardOwner: game?.isPlacingShips || !isMyTurn ? "you" : "opponent",
+				ships: game?.isPlacingShips ? this.ships : (!isMyTurn ? this.ships : []),
+				shots: [],
 				inventory: this.inventory,
 			});
 		}
