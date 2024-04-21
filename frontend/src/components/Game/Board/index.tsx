@@ -90,12 +90,12 @@ export default function GameBoard() {
 			}
 		}
 
-		if (isPlaying && isMyTurn) {
+		if (isPlaying && isMyTurn && !iAlreadyShot) {
 			if (currentCell !== null) {
 				drawShootHologram(currentCell, shots, refs);
 			}
 		}
-	}, [isPlacingShips, isPlaying, isMyTurn, currentCell, shipOrientation, ships, shots]);
+	}, [isPlacingShips, isPlaying, isMyTurn, currentCell, shipOrientation, ships, shots, iAlreadyShot]);
 
 	// Toggle ship orientation
 	useEffect(() => {
@@ -114,23 +114,6 @@ export default function GameBoard() {
 		}
 		window.addEventListener("keydown", handleUpdateOrientation);
 
-		// Place ship
-		const handlePlaceShip = (e: MouseEvent) => {
-			e.preventDefault();
-			if (currentCell === null || !currentShipSize || !shipOrientation || !socket || isReady) return;
-
-			// Left click to place ship
-			if (e.button === 0) {
-				socket.emit("placeShip", {
-					gameId: game,
-					origin: currentCell,
-					size: currentShipSize,
-					orientation: shipOrientation
-				});
-			}
-		}
-		window.addEventListener("mousedown", handlePlaceShip);
-
 		// Remove ship
 		const handleRemoveShip = (e: MouseEvent) => {
 			e.preventDefault();
@@ -144,31 +127,8 @@ export default function GameBoard() {
 		return () => {
 			window.removeEventListener("keydown", handleUpdateOrientation);
 			window.removeEventListener("contextmenu", handleRemoveShip);
-			window.removeEventListener("mousedown", handlePlaceShip);
 		}
 	}, [boardOwner, socket, isPlacingShips, isReady, inventory, currentCell, currentShipSize, shipOrientation]);
-
-	useEffect(() => {
-		if (!isPlaying || !isMyTurn || iAlreadyShot) return;
-
-		const handleShoot = (e: MouseEvent) => {
-			e.preventDefault();
-			if (currentCell === null || !socket) return;
-
-			// Left click to place ship
-			if (e.button === 0) {
-				socket.emit("shoot", {
-					gameId: game,
-					cell: currentCell,
-				});
-			}
-		}
-		window.addEventListener("mousedown", handleShoot);
-
-		return () => {
-			window.removeEventListener("mousedown", handleShoot);
-		}
-	}, [socket, isPlaying, isMyTurn, iAlreadyShot, currentCell]);
 
 	const handleReady = useCallback(() => {
 		if (!socket) return;
@@ -177,10 +137,31 @@ export default function GameBoard() {
 			gameId: game,
 			isReady: !isReady
 		});
-	}, [socket, isReady])
+	}, [socket, isReady]);
+
+
+	const handleClick = useCallback((currentCell: number) => {
+		if (isPlacingShips) {
+			if (!socket || isReady) return;
+
+			socket.emit("placeShip", {
+				gameId: game,
+				origin: currentCell,
+				size: currentShipSize,
+				orientation: shipOrientation
+			});
+		} else if (isPlaying && isMyTurn) {
+			if (!socket) return;
+
+			socket.emit("shoot", {
+				gameId: game,
+				cell: currentCell,
+			});
+		}
+	}, [socket, isPlacingShips, isPlaying, isMyTurn, isReady, currentShipSize, shipOrientation]);
 
 	return (
-		<div className="px-2 w-full lg:w-1/3 mx-auto">
+		<div className="px-2 w-full md:w-2/3 lg:w-1/3 mx-auto">
 			<div
 				className={twMerge(
 					"bg-gray-700/30 grid w-full h-fit border border-gray-700",
@@ -196,6 +177,7 @@ export default function GameBoard() {
 						<div
 							ref={refs[i]}
 							onMouseEnter={() => setCurrentCell(i)}
+							onClick={() => handleClick(i)}
 							onTouchEnd={() => setCurrentCell(null)}
 							key={i} className="border border-gray-700 w-auto aspect-square text-white/20 text-xs flex items-center justify-center"
 						>
