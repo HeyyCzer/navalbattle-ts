@@ -8,7 +8,7 @@ const GAMES = new Map<string, Game>();
 
 setInterval(() => {
 	GAMES.forEach(game => {
-		if (game.createdAt + 2 * 60 * 1000 > new Date().getTime()) return;
+		if (game.createdAt + 2 * 60 * 60 * 1000 > new Date().getTime()) return;
 		deleteGame(game.id);
 	});
 }, 60 * 1000);
