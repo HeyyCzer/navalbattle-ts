@@ -19,6 +19,8 @@ class Game {
 	timeToStart: number | null = null;
 	timer: NodeJS.Timeout | null = null;
 
+	createdAt: number = new Date().getTime();
+
 	constructor(id: string, board: Board) {
 		this.id = id;
 		this.board = board;

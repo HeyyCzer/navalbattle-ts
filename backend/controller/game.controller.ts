@@ -6,6 +6,13 @@ import { createId } from "../utils/cuid";
 
 const GAMES = new Map<string, Game>();
 
+setInterval(() => {
+	GAMES.forEach(game => {
+		if (game.createdAt + 2 * 60 * 1000 > new Date().getTime()) return;
+		deleteGame(game.id);
+	});
+}, 60 * 1000);
+
 export function createGame(
 	id: string | null,
 	boardCols: number,
