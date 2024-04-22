@@ -188,62 +188,77 @@ export default function GameBoard() {
 			</div>
 
 			{isPlacingShips && (
-				<div className="mt-2">
-					<div>
-						<span className="text-xs uppercase tracking-widest">Navios no inventário:</span>
-					</div>
+				<div className="mt-4">
+					<button
+						onClick={() => setShipOrientation((prev) => prev === "H" ? "V" : "H")}
+						className={twMerge(
+							"flex bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg py-1.5 px-4 text-xs uppercase tracking-widest w-fit mx-auto"
+						)}
+					>
+						<span className="text-white/60 mr-1.5">
+							(R)
+						</span>
+						Rotacionar navio
+					</button>
 
-					<div className="flex justify-between flex-wrap gap-2">
+					<div className="mt-2">
+						<div>
+							<span className="text-xs uppercase tracking-widest">Navios no inventário:</span>
+						</div>
+
+						<div className="flex justify-between flex-wrap gap-2">
+							{
+								inventory && inventory.ships.sort((a, b) => a.size > b.size ? 1 : -1).map((ship, i) => (
+									<button
+										key={i}
+										className={
+											twMerge(
+												"text-white/70 bg-white/30 px-2 py-1 rounded-md uppercase text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-700 hover:text-white",
+												ship.size === currentShipSize && "bg-emerald-800 text-white"
+											)}
+										onClick={() => setCurrentShipSize(ship.size)}
+										disabled={ship.amount === 0}
+									>
+										<span className={
+											twMerge(
+												"text-gray-400 mr-2 lowercase",
+												ship.size === currentShipSize && "text-emerald-300"
+											)}>
+											({ship.amount}x)
+										</span>
+										{ship.size} bloco(s)
+									</button>
+								))
+							}
+						</div>
+
+						<button
+							onClick={handleReady}
+							disabled={inventory.ships.some((ship) => ship.amount !== 0)}
+							className={twMerge(
+								"mt-6 flex bg-emerald-500 disabled:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg py-2 px-4 text-xs uppercase tracking-widest w-fit mx-auto",
+								(isReady && "bg-red-500")
+							)}
+						>
+							{!isReady ? "Estou pronto!" : "Mudei de ideia"}
+						</button>
 						{
-							inventory && inventory.ships.sort((a, b) => a.size > b.size ? 1 : -1).map((ship, i) => (
-								<button
-									key={i}
-									className={
-										twMerge(
-											"text-white/70 bg-white/30 px-2 py-1 rounded-md uppercase text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-emerald-700 hover:text-white",
-											ship.size === currentShipSize && "bg-emerald-800 text-white"
-										)}
-									onClick={() => setCurrentShipSize(ship.size)}
-									disabled={ship.amount === 0}
-								>
-									<span className={
-										twMerge(
-											"text-gray-400 mr-2 lowercase",
-											ship.size === currentShipSize && "text-emerald-300"
-										)}>
-										({ship.amount}x)
-									</span>
-									{ship.size} bloco(s)
-								</button>
-							))
+							inventory.ships.some((ship) => ship.amount !== 0) && (
+								<p className="text-sm text-center mt-2 text-gray-500">Posicione todos os seus navios para ficar pronto!</p>
+							)
+						}
+						{
+							(isReady && timeToStart === null) && (
+								<p className="text-sm text-center mt-2 text-gray-500">Aguardando o outro jogador...</p>
+							)
+						}
+						{
+							timeToStart !== null && (
+								<p className="text-sm text-center mt-2 text-gray-500">O jogo começará em {timeToStart} segundos...</p>
+							)
 						}
 					</div>
 
-					<button
-						onClick={handleReady}
-						disabled={inventory.ships.some((ship) => ship.amount !== 0)}
-						className={twMerge(
-							"mt-6 flex bg-emerald-500 disabled:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50 rounded-lg py-2 px-4 text-xs uppercase tracking-widest w-fit mx-auto",
-							(isReady && "bg-red-500")
-						)}
-					>
-						{!isReady ? "Estou pronto!" : "Mudei de ideia"}
-					</button>
-					{
-						inventory.ships.some((ship) => ship.amount !== 0) && (
-							<p className="text-sm text-center mt-2 text-gray-500">Posicione todos os seus navios para ficar pronto!</p>
-						)
-					}
-					{
-						(isReady && timeToStart === null) && (
-							<p className="text-sm text-center mt-2 text-gray-500">Aguardando o outro jogador...</p>
-						)
-					}
-					{
-						timeToStart !== null && (
-							<p className="text-sm text-center mt-2 text-gray-500">O jogo começará em {timeToStart} segundos...</p>
-						)
-					}
 				</div>
 			)}
 		</div>
