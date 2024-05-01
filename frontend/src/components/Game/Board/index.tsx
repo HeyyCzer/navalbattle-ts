@@ -113,20 +113,9 @@ export default function GameBoard() {
 			}
 		}
 		window.addEventListener("keydown", handleUpdateOrientation);
-
-		// Remove ship
-		const handleRemoveShip = (e: MouseEvent) => {
-			e.preventDefault();
-			if (currentCell === null || !socket || isReady) return;
-
-			// Right click to remove ship
-			socket.emit("removeShip", { gameId: game, cell: currentCell });
-		};
-		window.addEventListener("contextmenu", handleRemoveShip);
-
+		
 		return () => {
 			window.removeEventListener("keydown", handleUpdateOrientation);
-			window.removeEventListener("contextmenu", handleRemoveShip);
 		}
 	}, [boardOwner, socket, isPlacingShips, isReady, inventory, currentCell, currentShipSize, shipOrientation]);
 
@@ -138,7 +127,6 @@ export default function GameBoard() {
 			isReady: !isReady
 		});
 	}, [socket, isReady]);
-
 
 	const handleClick = useCallback((currentCell: number) => {
 		if (isPlacingShips) {
@@ -160,6 +148,15 @@ export default function GameBoard() {
 		}
 	}, [socket, isPlacingShips, isPlaying, isMyTurn, isReady, currentShipSize, shipOrientation]);
 
+	const handleRemoveShip = useCallback((e: MouseEvent, currentCell: number) => {
+		e.preventDefault();
+		if (!isPlacingShips || boardOwner !== "you") return;
+		if (currentCell === null || !socket || isReady) return;
+
+		// Right click to remove ship
+		socket.emit("removeShip", { gameId: game, cell: currentCell });
+	}, [isPlacingShips, boardOwner, currentCell, socket, isReady]);
+
 	return (
 		<div className="px-2 w-full md:w-2/3 lg:w-1/3 mx-auto">
 			<div
@@ -178,6 +175,8 @@ export default function GameBoard() {
 							ref={refs[i]}
 							onMouseEnter={() => setCurrentCell(i)}
 							onClick={() => handleClick(i)}
+							onContextMenu={() => handleRemoveShip(i)}
+							onLong={() => handleRemoveShip(i)}
 							onTouchEnd={() => setCurrentCell(null)}
 							key={i} className="border border-gray-700 w-auto aspect-square text-white/20 text-xs flex items-center justify-center"
 						>
